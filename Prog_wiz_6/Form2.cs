@@ -22,6 +22,8 @@ namespace Prog_wiz_6
         private int pozostaloDydelfow;
         private int czasPozostaly;
         private Timer timer = new Timer();
+        private Button krokodylCzekajacy = null;
+        private Timer timerKrokodyl = new Timer();
 
 
         private void Form2_Load(object sender, EventArgs e)
@@ -37,6 +39,9 @@ namespace Prog_wiz_6
             GenerujZwierzatka(w, k);
             GenerujPlansze(w, k);
             UruchomTimer();
+            timerKrokodyl.Interval = 2000;
+            timerKrokodyl.Tick += TimerKrokodyl_Tick;
+
         }
         private void GenerujZwierzatka(int w, int k)
         {
@@ -115,13 +120,24 @@ namespace Prog_wiz_6
                     break;
 
                 case 2: // Krokodyl
-                    klikniety.BackColor = Color.Red;
-                    klikniety.Text = "K";
-                    plansza[x, y] = -2;
-                    timer.Stop();
-                    MessageBox.Show("Trafiłeś na Krokodyla! Przegrałeś!");
-                    this.Close();
-                    break;
+                    if (krokodylCzekajacy == klikniety)
+                    {
+                        // Drugie kliknięcie – uratowano
+                        krokodylCzekajacy.Text = "";
+                        krokodylCzekajacy.BackColor = Color.Gray;
+                        krokodylCzekajacy.Enabled = true;
+                        krokodylCzekajacy = null;
+                        timerKrokodyl.Stop();
+                    }
+                    else
+                    {
+                        // Pierwsze kliknięcie – pokaz krokodyla i zacznij odliczanie
+                        klikniety.BackColor = Color.Red;
+                        klikniety.Text = "K";
+                        krokodylCzekajacy = klikniety;
+                        timerKrokodyl.Start();
+                    }
+                    return;
 
                 case 3: // Szop
                     klikniety.BackColor = Color.Blue;
@@ -175,6 +191,16 @@ namespace Prog_wiz_6
             timer.Stop();
             MessageBox.Show("Gratulacje! Znalazłeś wszystkie Dydelfy!");
             this.Close();
+        }
+        private void TimerKrokodyl_Tick(object sender, EventArgs e)
+        {
+            timerKrokodyl.Stop();
+
+            if (krokodylCzekajacy != null)
+            {
+                MessageBox.Show("Nie zdążyłeś! Krokodyl cię pożarł! Przegrałeś!");
+                this.Close();
+            }
         }
 
 
